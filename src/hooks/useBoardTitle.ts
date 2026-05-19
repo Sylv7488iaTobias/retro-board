@@ -1,29 +1,53 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Board } from '../types/board';
 
-export interface UseBoardTitleResult {
-  renameBoard: (board: Board, newTitle: string) => Board;
+interface UseBoardTitleReturn {
+  title: string;
+  isEditing: boolean;
+  startEditing: () => void;
+  handleChange: (value: string) => void;
+  commitTitle: () => void;
+  cancelEditing: () => void;
 }
 
-/**
- * Hook that provides a pure helper to rename a board,
- * returning a new Board object with an updated title and updatedAt timestamp.
- * Consumers are responsible for persisting the returned board.
- */
-export function useBoardTitle(): UseBoardTitleResult {
-  const renameBoard = useCallback((board: Board, newTitle: string): Board => {
-    const trimmed = newTitle.trim();
-    if (!trimmed) {
-      throw new Error('Board title must not be empty.');
-    }
-    return {
-      ...board,
-      title: trimmed,
-      updatedAt: new Date().toISOString(),
-    };
+export function useBoardTitle(
+  board: Board,
+  onUpdate: (board: Board) => void
+): UseBoardTitleReturn {
+  const [title, setTitle] = useState<string>(board.title);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  const startEditing = useCallback(() => {
+    setTitle(board.title);
+    setIsEditing(true);
+  }, [board.title]);
+
+  const handleChange = useCallback((value: string) => {
+    setTitle(value);
   }, []);
 
-  return { renameBoard };
-}
+  const commitTitle = useCallback(() => {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      setTitle(board.title);
+      setIsEditing(false);
+      return;
+    }
+    onUpdate({ ...board, title: trimmed, updatedAt: new Date().toISOString() });
+    setIsEditing(false);
+  }, [title, board, onUpdate]);
 
-export default useBoardTitle;
+  const cancelEditing = useCallback(() => {
+    setTitle(board.title);
+    setIsEditing(false);
+  }, [board.title]);
+
+  return {
+    title,
+    isEditing,
+    startEditing,
+    handleChange,
+    commitTitle,
+    cancelEditing,
+  };
+}
