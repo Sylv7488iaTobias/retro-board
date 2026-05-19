@@ -1,5 +1,13 @@
 export type CardCategory = 'went-well' | 'to-improve' | 'action-items';
 
+export const CARD_CATEGORIES: CardCategory[] = ['went-well', 'to-improve', 'action-items'];
+
+export const CARD_CATEGORY_LABELS: Record<CardCategory, string> = {
+  'went-well': 'Went Well',
+  'to-improve': 'To Improve',
+  'action-items': 'Action Items',
+};
+
 export interface Card {
   id: string;
   category: CardCategory;
