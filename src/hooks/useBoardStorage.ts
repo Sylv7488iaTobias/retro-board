@@ -13,6 +13,7 @@ interface UseBoardStorageReturn {
   loadBoard: (id: string) => Board | null;
   deleteBoard: (id: string) => void;
   refreshIds: () => void;
+  clearError: () => void;
   error: string | null;
 }
 
@@ -24,6 +25,10 @@ export function useBoardStorage(): UseBoardStorageReturn {
 
   const refreshIds = useCallback(() => {
     setSavedIds(listBoardIdsFromStorage());
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
   }, []);
 
   const saveBoard = useCallback((board: Board) => {
@@ -47,10 +52,14 @@ export function useBoardStorage(): UseBoardStorageReturn {
   }, []);
 
   const deleteBoard = useCallback((id: string) => {
-    removeBoardFromStorage(id);
-    setError(null);
-    refreshIds();
+    try {
+      removeBoardFromStorage(id);
+      setError(null);
+      refreshIds();
+    } catch {
+      setError(`Failed to delete board "${id}".`);
+    }
   }, [refreshIds]);
 
-  return { savedIds, saveBoard, loadBoard, deleteBoard, refreshIds, error };
+  return { savedIds, saveBoard, loadBoard, deleteBoard, refreshIds, clearError, error };
 }
