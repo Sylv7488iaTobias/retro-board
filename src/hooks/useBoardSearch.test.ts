@@ -68,6 +68,13 @@ describe('useBoardSearch', () => {
     expect(result.current.results.length).toBeGreaterThan(1);
   });
 
+  it('returns no results when query matches nothing', () => {
+    const { result } = renderHook(() => useBoardSearch(makeBoard()));
+    act(() => result.current.setQuery('xyznotfound'));
+    expect(result.current.results).toHaveLength(0);
+    expect(result.current.hasQuery).toBe(true);
+  });
+
   it('clears search query', () => {
     const { result } = renderHook(() => useBoardSearch(makeBoard()));
     act(() => result.current.setQuery('planning'));
